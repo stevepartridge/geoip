@@ -1,5 +1,9 @@
 package geoip
 
+import (
+	"encoding/json"
+)
+
 type IP struct {
 	IP          string  `json:"ip"`
 	CountryName string  `json:"country_name"`
@@ -15,6 +19,14 @@ type IP struct {
 	ISP         string  `json:"isp"`
 	Org         string  `json:"org"`
 	As          string  `json:"as"`
+}
+
+func (ip *IP) ToJSONString() string {
+	data, err := json.Marshal(ip)
+	if err != nil {
+		return ""
+	}
+	return string(data)
 }
 
 type IPResult struct {
