@@ -5,17 +5,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
 
 type Client struct {
-	Debug      bool
-	LastLookup *IP
+	Debug         bool
+	IPStackApiKey string
+	LastLookup    *IP
 }
 
 func New() *Client {
-	return &Client{}
+	return &Client{
+		IPStackApiKey: os.Getenv("IPSTACK_API_KEY"),
+	}
 }
 
 // Lookup takes a string based IPv4 address and queries for location and ISP info.
@@ -28,11 +32,11 @@ func (self *Client) Lookup(ipQuery string) (IP, error) {
 
 		// freegeoip.net
 		func(ip *IP) {
-			freeGeoIP := FreeGeoIPResult{}
+			ipStack := IPStackResult{}
 			var debug DebugResult
 			debug, err = self.call(
-				"http://freegeoip.net/json/"+ipQuery,
-				&freeGeoIP,
+				fmt.Sprintf("http://api.ipstack.com/%s?access_key=%s", ipQuery, self.IPStackApiKey),
+				&ipStack,
 			)
 
 			if err != nil {
@@ -40,20 +44,20 @@ func (self *Client) Lookup(ipQuery string) (IP, error) {
 				return
 			}
 
-			ip.IP = freeGeoIP.IP
-			ip.CountryName = freeGeoIP.CountryName
-			ip.CountryCode = freeGeoIP.CountryCode
-			ip.RegionName = freeGeoIP.RegionName
-			ip.RegionCode = freeGeoIP.RegionCode
-			ip.City = freeGeoIP.City
-			ip.ZipCode = freeGeoIP.ZipCode
-			ip.Timezone = freeGeoIP.Timezone
-			ip.Latitude = freeGeoIP.Latitude
-			ip.Longitude = freeGeoIP.Longitude
-			ip.MetroCode = freeGeoIP.MetroCode
+			ip.IP = ipStack.IP
+			ip.CountryName = ipStack.CountryName
+			ip.CountryCode = ipStack.CountryCode
+			ip.RegionName = ipStack.RegionName
+			ip.RegionCode = ipStack.RegionCode
+			ip.City = ipStack.City
+			ip.ZipCode = ipStack.ZipCode
+			ip.Timezone = ipStack.Timezone
+			ip.Latitude = ipStack.Latitude
+			ip.Longitude = ipStack.Longitude
+			ip.MetroCode = ipStack.MetroCode
 
 			if self.Debug {
-				fmt.Println("debug freegeoip", debug, freeGeoIP)
+				fmt.Println("debug freegeoip", debug, ipStack)
 			}
 		},
 
