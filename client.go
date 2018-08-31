@@ -54,6 +54,9 @@ func (self *Client) Lookup(ipQuery string) (IP, error) {
 			ip.Timezone = ipStack.Timezone
 			ip.Latitude = ipStack.Latitude
 			ip.Longitude = ipStack.Longitude
+			ip.Timezone = ipStack.Timezone
+			ip.Location = ipStack.Location
+			ip.Currency = ipStack.Currency
 			ip.MetroCode = ipStack.MetroCode
 
 			if self.Debug {
@@ -108,7 +111,7 @@ func (self *Client) Lookup(ipQuery string) (IP, error) {
 
 // Call uses basic (GET) method to make a request to the API
 func (self *Client) call(apiUrl string, result interface{}) (DebugResult, error) {
-
+	fmt.Println("call", apiUrl)
 	timeout := time.Duration(10 * time.Second)
 
 	client := http.Client{
@@ -135,6 +138,8 @@ func (self *Client) call(apiUrl string, result interface{}) (DebugResult, error)
 		StatusCode:   resp.StatusCode,
 		RawResponse:  body,
 	}
+
+	fmt.Println("body", string(body))
 
 	err = json.Unmarshal(body, &result)
 	if err != nil {
